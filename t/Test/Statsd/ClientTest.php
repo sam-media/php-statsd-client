@@ -76,7 +76,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $statsd = new \Statsd\Client(array('connection' => $sc));
         $statsd->addCommand(
-            new \Statsd\Client\Command\Increment()
+            new \Statsd\Client\Command\Counter()
         );
         
         $this->assertInstanceOf(
@@ -94,7 +94,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $statsd = new \Statsd\Client(array('connection' => $sc));
         $statsd->addCommand(
-            new \Statsd\Client\Command\Increment()
+            new \Statsd\Client\Command\Counter()
         );
         $statsd->setPrefix('top');
         
@@ -112,7 +112,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testClientCallCommandWithException()
     {
         $cmd = $this->getMock(
-            '\Statsd\Client\Command\Increment',
+            '\Statsd\Client\Command\Counter',
             array('incr')
         );
 
@@ -123,6 +123,19 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $statsd = new \Statsd\Client(array('throw_exception'=> true));
         $statsd->addCommand($cmd);
         $statsd->__call('incr', array('foo.bar', 1));
+    }
+
+    public function testChaingCall()
+    {
+        $statsd = new \Statsd\Client();
+        $result = $statsd->incr('foo.bar')
+            ->decr('foo.bar')
+            ->gauge('foo.bar', 10);
+
+        $this->assertInstanceOf(
+            '\Statsd\Client',
+            $result
+        );
     }
 
 }

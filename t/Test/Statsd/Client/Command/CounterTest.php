@@ -1,21 +1,21 @@
 <?php
 namespace Test\Statsd\Client\Command;
 
-class IncrementTest extends \PHPUnit_Framework_TestCase
+class CounterTest extends \PHPUnit_Framework_TestCase
 {
     public function testObject()
     {
-        $inc = new \Statsd\Client\Command\Increment();
+        $inc = new \Statsd\Client\Command\Counter();
         $this->assertEquals(
-            array('incr'),
+            array('incr', 'decr'),
             $inc->getCommands()
         );
     }
 
     public function testCheckMethodsExistence()
     {
-        $inc = new \Statsd\Client\Command\Increment();
-        $class = new \ReflectionClass('\Statsd\Client\Command\Increment');
+        $inc = new \Statsd\Client\Command\Counter();
+        $class = new \ReflectionClass('\Statsd\Client\Command\Counter');
         foreach($inc->getCommands() as $cmd){
             $method = $class->getMethod($cmd);
             $this->assertTrue(true, 'Just make sure previous was not thrown');
@@ -24,7 +24,7 @@ class IncrementTest extends \PHPUnit_Framework_TestCase
 
     public function testIncr()
     {
-        $inc = new \Statsd\Client\Command\Increment();
+        $inc = new \Statsd\Client\Command\Counter();
         $this->assertEquals(
             'foo.bar:1|c',
             $inc->incr('foo.bar')
@@ -34,7 +34,7 @@ class IncrementTest extends \PHPUnit_Framework_TestCase
     public function testIncrByRate()
     {
         //How odd it would be if this test fails!
-        $inc = new \Statsd\Client\Command\Increment();
+        $inc = new \Statsd\Client\Command\Counter();
         $this->assertNull(
             $inc->incr('foo.bar', 5, 0.000000000001)
         );
@@ -44,7 +44,7 @@ class IncrementTest extends \PHPUnit_Framework_TestCase
     public function testIncrSendByRate()
     {
         $inc = $this->getMock(
-            '\Statsd\Client\Command\Increment',
+            '\Statsd\Client\Command\Counter',
             array(
                 'genRand'
             )
@@ -64,7 +64,7 @@ class IncrementTest extends \PHPUnit_Framework_TestCase
     public function testIncrNullByRate()
     {
         $inc = $this->getMock(
-            '\Statsd\Client\Command\Increment',
+            '\Statsd\Client\Command\Counter',
             array(
                 'genRand'
             )
@@ -79,4 +79,14 @@ class IncrementTest extends \PHPUnit_Framework_TestCase
             $inc->incr('foo.bar', 1 , 0.5)
         );
     }
+
+    public function testDecr()
+    {
+        $inc = new \Statsd\Client\Command\Counter();
+        $this->assertEquals(
+            'foo.bar:-1|c',
+            $inc->decr('foo.bar')
+        );
+    }
+
 }

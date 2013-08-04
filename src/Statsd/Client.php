@@ -21,6 +21,21 @@ class Client
         } else {
             $this->connection = $this->settings['connection'];
         }
+        $this->registerCommands();
+    }
+
+    private function registerCommands()
+    {
+        $commands = array(
+           '\Statsd\Client\Command\Counter',
+           '\Statsd\Client\Command\Set',
+           '\Statsd\Client\Command\Timer',
+           '\Statsd\Client\Command\Gauge',
+        );
+
+        foreach($commands as $cmd) {
+            $this->addCommand(new $cmd);
+        }
     }
 
     public function addCommand($cmd_obj)
