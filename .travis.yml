@@ -1,0 +1,12 @@
+language: php
+
+php:
+    - 5.3
+    - 5.4
+script:
+    - mkdir -p build/logs
+    - ./vendor/bin/phpunit --debug --verbose --coverage-clover build/logs/clover.xml t/Test
+before_install:
+    - composer install --dev
+after_script:
+    - php vendor/bin/coveralls -v
