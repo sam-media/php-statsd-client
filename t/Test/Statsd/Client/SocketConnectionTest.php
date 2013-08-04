@@ -1,0 +1,108 @@
+<?php
+namespace Test\Statsd\Client;
+
+class SocketConnectionTest extends \PHPUnit_Framework_TestCase
+{
+
+    public function testObject()
+    {
+        $sc = new \Statsd\Client\SocketConnection(
+            array(
+                'host' => '127.0.0.1',
+                'port' => '8125',
+                'throw_exception' => false,
+            )
+        );
+    }
+
+    public function testSuccessfulSendMessage()
+    {
+        $sc = new \Statsd\Client\SocketConnection();
+        $this->assertEquals(
+            6,
+            $sc->send("123456")
+        );
+    }
+
+    public function testFailSendMessage()
+    {
+        $sc = new \Statsd\Client\SocketConnection(
+            array(
+                'host' => 'foo.bar',
+            )
+        );
+        $this->assertEquals(
+            0,
+            $sc->send("123456")
+        );
+    }
+
+    /**
+     * @expectedException Exception
+     * @expectedExceptionMessage fsockopen(): php_network_getaddresses: getaddrinfo failed: Name or service not known
+     */
+    public function testExceptioOpenSocket()
+    {
+        $sc = $this->getMock(
+            '\Statsd\Client\SocketConnection',
+            array(
+                'fsockopen'
+            ),
+            array(
+                array(
+                    'throw_exception' => true,
+                    'host' => 'foo.bar',
+                )
+            )
+        );
+
+        //$sc->openSocket();
+    }
+
+    public function testExceptionSendMessageWithoutThrowingIt()
+    {
+        $sc = $this->getMock(
+            '\Statsd\Client\SocketConnection',
+            array(
+                'fwrite'
+            )
+        );
+
+        $sc->expects($this->any())
+            ->method('fwrite')
+            ->will($this->throwException(new \Exception)
+        );
+
+        $this->assertEquals(
+            0,
+            $sc->send("123456")
+        );
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testExceptionSendMessage()
+    {
+        $sc = $this->getMock(
+            '\Statsd\Client\SocketConnection',
+            array(
+                'fwrite'
+            ),
+            array(
+                array('throw_exception' => true)
+            )
+        );
+
+        $sc->expects($this->any())
+            ->method('fwrite')
+            ->will($this->throwException(new \Exception)
+        );
+
+        $this->assertEquals(
+            0,
+            $sc->send("123456")
+        );
+    }
+
+}
