@@ -26,8 +26,8 @@ class SocketConnection implements ConnectionInterface
                 ),
                 $this->settings['port']
             );
-        } catch(\Exception $e) {
-            if($this->settings['throw_exception'] == true) {
+        } catch (\Exception $e) {
+            if ($this->settings['throw_exception'] == true) {
                 throw $e;
             }
             $this->socket = null;
@@ -45,8 +45,8 @@ class SocketConnection implements ConnectionInterface
             if (trim($string)) {
                 return $this->fwrite($this->socket, $string);
             }
-        } catch(\Exception $e) {
-            if($this->settings['throw_exception'] == true) {
+        } catch (\Exception $e) {
+            if ($this->settings['throw_exception'] == true) {
                 throw $e;
             }
         }

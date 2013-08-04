@@ -12,7 +12,7 @@ class Gauge extends \Statsd\Client\Command
 
     public function gauge($stat, $value, $rate=1, $delta=false)
     {
-        if(is_bool($rate) && $rate === true) {
+        if (is_bool($rate) && $rate === true) {
             $delta = true;
         }
 

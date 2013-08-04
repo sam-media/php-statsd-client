@@ -16,7 +16,7 @@ class Client
             ),
             $settings
         );
-        if($this->settings['connection'] == null){
+        if ($this->settings['connection'] == null) {
             $this->connection = new Client\SocketConnection($this->settings);
         } else {
             $this->connection = $this->settings['connection'];
@@ -33,7 +33,7 @@ class Client
            '\Statsd\Client\Command\Gauge',
         );
 
-        foreach($commands as $cmd) {
+        foreach ($commands as $cmd) {
             $this->addCommand(new $cmd);
         }
     }
@@ -41,7 +41,7 @@ class Client
     public function addCommand($cmd_obj)
     {
         $class = new \ReflectionObject($cmd_obj);
-        if(!$class->implementsInterface('\Statsd\Client\CommandInterface')) {
+        if (!$class->implementsInterface('\Statsd\Client\CommandInterface')) {
             throw new \InvalidArgumentException(
                 sprintf(
                     "%s::addCommand() accept class that implements CommandInterface",
@@ -50,14 +50,14 @@ class Client
             );
         }
 
-        foreach($cmd_obj->getCommands() as $cmd){
+        foreach ($cmd_obj->getCommands() as $cmd) {
             $this->commands[$cmd] = $cmd_obj;
         }
     }
 
     public function __call($name, $arguments)
     {
-        if(!array_key_exists($name, $this->commands)) {
+        if (!array_key_exists($name, $this->commands)) {
             throw new \BadFunctionCallException(
                 sprintf(
                     "Call to undefined method %s::%s()",
@@ -71,7 +71,7 @@ class Client
             if (!trim($command)) {
                 return $this;
             }
-            if(trim($this->getPrefix())){
+            if (trim($this->getPrefix())) {
                 $command = sprintf(
                     "%s.%s",
                     $this->getPrefix(),
@@ -79,8 +79,8 @@ class Client
                 );
             }
             $this->connection->send($command);
-        } catch(\Exception $e) {
-            if($this->settings['throw_exception'] == true) {
+        } catch (\Exception $e) {
+            if ($this->settings['throw_exception'] == true) {
                 throw $e;
             }
         }
