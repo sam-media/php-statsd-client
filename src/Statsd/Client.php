@@ -41,7 +41,11 @@ class Client
     public function addCommand($cmd_obj)
     {
         $class = new \ReflectionObject($cmd_obj);
-        if(!$class->implementsInterface('\Statsd\Client\CommandInterface')) {
+        $instanceof =  in_array(
+            'Statsd\Client\CommandInterface',
+            array_keys(class_implements($cmd_obj))
+        );
+        if(!$instanceof) {
             throw new \InvalidArgumentException(
                 sprintf(
                     "%s::addCommand() accept class that implements CommandInterface",
