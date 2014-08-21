@@ -28,7 +28,7 @@ class SocketConnectionTest extends \PHPUnit_Framework_TestCase
     {
         $sc = new \Statsd\Client\SocketConnection(
             array(
-                'host' => 'foo.bar',
+                'host' => 'host-foo.bar',
             )
         );
         $this->assertEquals(
@@ -39,7 +39,7 @@ class SocketConnectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Exception
-     * @expectedExceptionMessage fsockopen(): php_network_getaddresses: getaddrinfo failed: Name or service not known
+     * @expectedExceptionMessage failed
      */
     public function testExceptioOpenSocket()
     {
@@ -51,7 +51,7 @@ class SocketConnectionTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'throw_exception' => true,
-                    'host' => 'foo.bar',
+                    'host' => 'host-foo.bar',
                 )
             )
         );

@@ -19,6 +19,7 @@ class SocketConnection implements ConnectionInterface
     public function openSocket()
     {
         try {
+
             $this->socket = $this->fsockopen(
                 sprintf(
                     "udp://%s",
