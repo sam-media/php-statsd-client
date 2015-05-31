@@ -56,6 +56,6 @@ class SocketConnection implements ConnectionInterface
 
     public function fwrite($socket, $string)
     {
-        return fwrite($socket, $string);
+        return @fwrite($socket, $string);
     }
 }
