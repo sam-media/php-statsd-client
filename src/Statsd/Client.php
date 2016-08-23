@@ -5,16 +5,27 @@ class Client
 {
     protected $commands = array();
 
+    /**
+     * Returns associative array of deafult settings.
+     *
+     * @return array
+     */
+    protected static function getDefaultSettings()
+    {
+        return array(
+                    'prefix' => '',
+                    'throw_exception' => false,
+                    'connection' => null
+                );
+    }
+
     public function __construct(array $settings=array())
     {
         $this->settings = array_merge(
-            array(
-                'prefix' => '',
-                'throw_exception' => false,
-                'connection' => null,
-            ),
+            static::getDefaultSettings(),
             $settings
         );
+
         if ($this->settings['connection'] == null) {
             $this->connection = new Client\SocketConnection($this->settings);
         } else {
@@ -23,7 +34,7 @@ class Client
         $this->registerCommands();
     }
 
-    private function registerCommands()
+    protected function registerCommands()
     {
         $commands = array(
            '\Statsd\Client\Command\Counter',
@@ -37,6 +48,9 @@ class Client
         }
     }
 
+    /**
+     * @param Statsd\Client\CommandInterface
+     */
     public function addCommand($cmd_obj)
     {
         $class = new \ReflectionObject($cmd_obj);
@@ -90,7 +104,7 @@ class Client
         return $this;
     }
 
-    private function callCommand($name, $arguments)
+    protected function callCommand($name, $arguments)
     {
         $cmd_obj = $this->commands[$name];
         return call_user_func_array(
