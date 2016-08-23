@@ -40,7 +40,6 @@ class CounterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-
     public function testIncrSendByRate()
     {
         $inc = $this->getMock(
@@ -88,5 +87,4 @@ class CounterTest extends \PHPUnit_Framework_TestCase
             $inc->decr('foo.bar')
         );
     }
-
 }

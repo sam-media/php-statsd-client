@@ -3,7 +3,6 @@ namespace Test\Statsd\Client;
 
 class SocketConnectionTest extends \PHPUnit_Framework_TestCase
 {
-
     public function testObject()
     {
         $sc = new \Statsd\Client\SocketConnection(
@@ -104,5 +103,4 @@ class SocketConnectionTest extends \PHPUnit_Framework_TestCase
             $sc->send("123456")
         );
     }
-
 }
