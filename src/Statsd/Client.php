@@ -1,6 +1,8 @@
 <?php
 namespace Statsd;
 
+use \Statsd\Client\CommandInterface;
+
 class Client
 {
     protected $commands = array();
@@ -49,26 +51,12 @@ class Client
     }
 
     /**
-     * @param Statsd\Client\CommandInterface
+     * @param \Statsd\Client\CommandInterface
      */
-    public function addCommand($cmd_obj)
+    public function addCommand(CommandInterface $cmdObj)
     {
-        $class = new \ReflectionObject($cmd_obj);
-        $instanceof =  in_array(
-            'Statsd\Client\CommandInterface',
-            array_keys(class_implements($cmd_obj))
-        );
-        if (!$instanceof) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    "%s::addCommand() accept class that implements CommandInterface",
-                    __CLASS__
-                )
-            );
-        }
-
-        foreach($cmd_obj->getCommands() as $cmd){
-            $this->commands[$cmd] = $cmd_obj;
+        foreach ($cmdObj->getCommands() as $cmd) {
+            $this->commands[$cmd] = $cmdObj;
         }
     }
 
@@ -106,9 +94,9 @@ class Client
 
     protected function callCommand($name, $arguments)
     {
-        $cmd_obj = $this->commands[$name];
+        $cmdObj = $this->commands[$name];
         return call_user_func_array(
-            array($cmd_obj, $name),
+            array($cmdObj, $name),
             $arguments
         );
     }

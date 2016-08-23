@@ -41,16 +41,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $statsd->fooFunc("foo", "bar");
     }
 
-    /**
-     * @expectedException InvalidArgumentException 
-     * @expectedExceptionMessage Statsd\Client::addCommand() accept class that implements CommandInterface
-     */
-    public function testClientWithWrongCommandObject()
-    {
-        $statsd = new \Statsd\Client();
-        $statsd->addCommand(new \StdClass());
-    }
-
     public function getMockUpSocketConnection()
     {
         return $this->getMock(
