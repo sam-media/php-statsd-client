@@ -22,7 +22,7 @@ class Timer extends AbstractCommand
     {
         if ($this->isCallable($delta)) {
             $startTime = gettimeofday(true);
-            $delta();
+            call_user_func($delta);
             $endTime = gettimeofday(true);
             $delta = ($endTime - $startTime) * 1000;
         }
