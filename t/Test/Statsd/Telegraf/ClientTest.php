@@ -121,6 +121,156 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @dataProvider provideParamsForIncrAndExpectedRequest
+     */
+    public function testClientSupportsIncrByDefault(
+        $expectedRequest,
+        array $defaultTags,
+        $stat,
+        $count,
+        array $tags
+    )
+    {
+        $socketMock = $this->mockSocketConnection();
+        $socketMock->expects($this->once())->method('send')->with($expectedRequest);
+
+        $client = new Client(array('connection' => $socketMock, 'default_tags' => $defaultTags));
+        $this->assertInstanceOf(
+            '\\Statsd\\Telegraf\\Client',
+            $client->incr($stat, $count, 1, $tags)
+        );
+    }
+
+    public static function provideParamsForIncrAndExpectedRequest()
+    {
+        return array(
+            'no tags' => array('event.login:1|c', array(), 'event.login', 1, array()),
+            'with default tags' => array('event.good,region=world:3|c', array('region'=>'world'), 'event.good', 3, array()),
+            'with tags' => array('event.good,region=world:2|c', array(), 'event.good', 2, array('region' => 'world'))
+        );
+    }
+
+    /**
+     * @dataProvider provideParamsForDecrAndExpectedRequest
+     */
+    public function testClientSupportsDecrByDefault(
+        $expectedRequest,
+        array $defaultTags,
+        $stat,
+        $count,
+        array $tags
+    )
+    {
+        $socketMock = $this->mockSocketConnection();
+        $socketMock->expects($this->once())->method('send')->with($expectedRequest);
+
+        $client = new Client(array('connection' => $socketMock, 'default_tags' => $defaultTags));
+        $this->assertInstanceOf(
+            '\\Statsd\\Telegraf\\Client',
+            $client->decr($stat, $count, 1, $tags)
+        );
+    }
+
+    public static function provideParamsForDecrAndExpectedRequest()
+    {
+        return array(
+            'no tags' => array('event:-1|c', array(), 'event', 1, array()),
+            'with default tags' => array('event.bad,region=world:-2|c', array('region' => 'world'), 'event.bad', 2, array()),
+            'with tags' => array('event.bad,region=world:-3|c', array(), 'event.bad', 3, array('region' => 'world'))
+        );
+    }
+
+    /**
+     * @dataProvider provideParamsForTimingAndExpectedRequest
+     */
+    public function testClientSupportsTimingByDefault(
+        $expectedRequest,
+        array $defaultTags,
+        $stat,
+        $delta,
+        array $tags
+    )
+    {
+        $socketMock = $this->mockSocketConnection();
+        $socketMock->expects($this->once())->method('send')->with($expectedRequest);
+
+        $client = new Client(array('connection' => $socketMock, 'default_tags' => $defaultTags));
+        $this->assertInstanceOf(
+            '\\Statsd\\Telegraf\\Client',
+            $client->timing($stat, $delta, 1, $tags)
+        );
+    }
+
+    public static function provideParamsForTimingAndExpectedRequest()
+    {
+        return array(
+            'no tags' => array('query:1|ms', array(), 'query', 1, array()),
+            'with default tags' => array('db.query,region=world:2|ms', array('region' => 'world'), 'db.query', 2, array()),
+            'with tags' => array('db.query,region=world:34|ms', array(), 'db.query', 34, array('region' => 'world'))
+        );
+    }
+
+    /**
+     * @dataProvider provideParamsForSetAndExpectedRequest
+     */
+    public function testClientSupportsSetByDefault(
+        $expectedRequest,
+        array $defaultTags,
+        $stat,
+        $value,
+        array $tags
+    )
+    {
+        $socketMock = $this->mockSocketConnection();
+        $socketMock->expects($this->once())->method('send')->with($expectedRequest);
+
+        $client = new Client(array('connection' => $socketMock, 'default_tags' => $defaultTags));
+        $this->assertInstanceOf(
+            '\\Statsd\\Telegraf\\Client',
+            $client->set($stat, $value, 1, $tags)
+        );
+    }
+
+    public static function provideParamsForSetAndExpectedRequest()
+    {
+        return array(
+            'no tags' => array('id:1000|s', array(), 'id', 1000, array()),
+            'with default tags' => array('usr.id,region=world:2200|s', array('region' => 'world'), 'usr.id', 2200, array()),
+            'with tags' => array('usr.id,region=world:3|s', array(), 'usr.id', 3, array('region' => 'world'))
+        );
+    }
+
+    /**
+     * @dataProvider provideParamsForGaugeAndExpectedRequest
+     */
+    public function testClientSupportsGaugeByDefault(
+        $expectedRequest,
+        array $defaultTags,
+        $stat,
+        $value,
+        array $tags
+    )
+    {
+        $socketMock = $this->mockSocketConnection();
+        $socketMock->expects($this->once())->method('send')->with($expectedRequest);
+
+        $client = new Client(array('connection' => $socketMock, 'default_tags' => $defaultTags));
+        $this->assertInstanceOf(
+            '\\Statsd\\Telegraf\\Client',
+            $client->gauge($stat, $value, 1, false, $tags)
+        );
+    }
+
+    public static function provideParamsForGaugeAndExpectedRequest()
+    {
+        return array(
+            'no tags' => array('cpu_percent:44|g', array(), 'cpu_percent', 44, array()),
+            'with default tags' => array('resource.mem_mb,region=world:123|g', array('region' => 'world'), 'resource.mem_mb', 123, array()),
+            'with tags' => array('mem_mb,region=world:34|g', array(), 'mem_mb', 34, array('region' => 'world'))
+        );
+    }
+
     public function testClientSupportsFluentApi_WithAllStandardCommands()
     {
         $socketMock = $this->mockSocketConnection();
