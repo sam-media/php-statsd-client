@@ -15,7 +15,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $allSettings = $client->getSettings();
         $this->assertFalse($allSettings['throw_exception']);
-        $this->assertEquals(array(), $allSettings['tags']);
+        $this->assertEquals(array(), $allSettings['default_tags']);
     }
 
     /**
@@ -37,7 +37,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $defaultSettings = array(
             'throw_exception' => false,
-            'tags' => array(),
+            'default_tags' => array(),
             'connection' => null,
             'prefix' => ''
         );
@@ -47,9 +47,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $prefixParams = array('prefix' => 'test');
 
         $tagsAndExceptionsSettings = $defaultSettings;
-        $tagsAndExceptionsSettings['tags'] = array('region' => 'world');
+        $tagsAndExceptionsSettings['default_tags'] = array('region' => 'world');
         $tagsAndExceptionsSettings['throw_exception'] = true;
-        $tagsAndExceptionsParams = array('tags' => array('region' => 'world'), 'throw_exception' => true);
+        $tagsAndExceptionsParams = array('default_tags' => array('region' => 'world'), 'throw_exception' => true);
 
         return array(
             'empty params' => array($defaultSettings, array()),

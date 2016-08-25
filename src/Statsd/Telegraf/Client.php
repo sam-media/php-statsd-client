@@ -20,7 +20,35 @@ class Client extends \Statsd\Client
                     'prefix' => '',
                     'throw_exception' => false,
                     'connection' => null,
-                    'tags' => array()
+                    'default_tags' => array()
                 );
+    }
+
+    /**
+     * Return associative array of default tags applied for all metrics
+     * without specific tags.
+     *
+     * @return array
+     */
+    public function getDefaultTags()
+    {
+        return $this->settings['default_tags'];
+    }
+
+    protected function registerCommands()
+    {
+        $tags = $this->getDefaultTags();
+
+        $commands = array(
+           new Counter(),
+           new Set(),
+           new Timer(),
+           new Gauge(),
+        );
+
+        foreach ($commands as $command) {
+            $command->setDefaultTags($tags);
+            $this->addCommand($command);
+        }
     }
 }
