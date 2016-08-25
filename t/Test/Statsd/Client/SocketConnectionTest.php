@@ -42,6 +42,10 @@ class SocketConnectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testExceptioOpenSocket()
     {
+        $this->markTestSkipped(
+            "Throwing exceptions on socket connection is not consistent between HHVM and PHP"
+            . "Even PHP documentation says detecting connection errors is not gruaranteed for UDP sockets"
+        );
         $sc = $this->getMock(
             '\Statsd\Client\SocketConnection',
             array(
