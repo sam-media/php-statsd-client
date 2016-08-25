@@ -57,4 +57,14 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             'tags and throw_exception params' => array($tagsAndExceptionsSettings, $tagsAndExceptionsParams),
         );
     }
+
+    /**
+     * @expectedException BadMethodCallException
+     * @expectedExceptionMessage Call to undefined method Statsd\Telegraf\Client::fooFunc()
+     */
+    public function testClientWithWrongCommand()
+    {
+        $client = new Client();
+        $client->fooFunc("foo", "bar");
+    }
 }

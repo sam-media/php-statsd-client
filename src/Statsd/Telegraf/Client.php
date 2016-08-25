@@ -1,6 +1,7 @@
 <?php
 namespace Statsd\Telegraf;
 
+use BadMethodCallException;
 use Statsd\Telegraf\Client\Command\Counter;
 use Statsd\Telegraf\Client\Command\Set;
 use Statsd\Telegraf\Client\Command\Timer;
@@ -50,5 +51,19 @@ class Client extends \Statsd\Client
             $command->setDefaultTags($tags);
             $this->addCommand($command);
         }
+    }
+
+    public function __call($name, $args)
+    {
+        if (!array_key_exists($name, $this->commands) ) {
+            throw new BadMethodCallException(
+                sprintf(
+                    "Call to undefined method %s::%s()",
+                    get_class($this),
+                    $name
+                )
+            );
+        }
+        return parent::__call($name, $args);
     }
 }
