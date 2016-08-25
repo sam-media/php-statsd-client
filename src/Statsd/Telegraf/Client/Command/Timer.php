@@ -20,7 +20,7 @@ class Timer extends AbstractCommand
      */
     public function timing($stat, $delta, $rate=1, array $tags=array())
     {
-        if (is_callable($delta)) {
+        if ($this->isCallable($delta)) {
             $startTime = gettimeofday(true);
             $delta();
             $endTime = gettimeofday(true);
@@ -28,5 +28,20 @@ class Timer extends AbstractCommand
         }
 
         return $this->prepare($stat, sprintf('%d|ms', $delta), $rate, $tags);
+    }
+
+    /**
+     * @param  mixed   $callable
+     * @return bool
+     */
+    private function isCallable($callable)
+    {
+        if (is_array($callable)) {
+            if (count($callable) !== 2) {
+                return false;
+            }
+            return method_exists($callable[0], $callable[1]);
+        }
+        return is_callable($callable);
     }
 }

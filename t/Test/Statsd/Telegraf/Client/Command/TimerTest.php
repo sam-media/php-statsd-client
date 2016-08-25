@@ -98,7 +98,7 @@ class TimerTest extends \PHPUnit_Framework_TestCase
             'test.static.method.sleep:1000|ms',
             $impl->timing(
                 'test.static.method.sleep',
-                '\\Test\\Statsd\\Telegraf\\Client\\Command\\TimerTest::staticallySleep1Second',
+                array('\\Test\\Statsd\\Telegraf\\Client\\Command\\TimerTest', 'staticallySleep1Second'),
                 1
             )
         );
