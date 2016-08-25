@@ -1,7 +1,6 @@
 <?php
 namespace Test\Statsd\Telegraf;
 
-use StdClass;
 use Statsd\Telegraf\Client;
 use Statsd\Telegraf\Client\Command\Counter;
 use Statsd\Telegraf\Client\Command\Timer;
@@ -33,7 +32,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     /**
      * @return array
      */
-    public static function provideExpectedSettingsAndConstructorParams()
+    public function provideExpectedSettingsAndConstructorParams()
     {
         $defaultSettings = array(
             'throw_exception' => false,
@@ -59,12 +58,102 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException BadMethodCallException
+     * @expectedException \BadMethodCallException
      * @expectedExceptionMessage Call to undefined method Statsd\Telegraf\Client::fooFunc()
      */
     public function testClientWithWrongCommand()
     {
         $client = new Client();
         $client->fooFunc("foo", "bar");
+    }
+
+    public function testClientAcceptsAdditionalCommands()
+    {
+        $socketMock = $this->mockSocketConnection();
+        $socketMock->expects($this->any())
+            ->method('send')
+            ->with("_foo.bar_:1003|xyz");
+
+        $commandMock = $this->getMock('\\Statsd\\Telegraf\\Client\\Command\\Counter', array('incr'));
+        $commandMock->expects($this->once())
+            ->method('incr')
+            ->with('foo.bar', 1003, 1)
+            ->will($this->returnValue('_foo.bar_:1003|xyz'));
+
+        $client = new Client(array('connection' => $socketMock));
+        $client->addCommand($commandMock);
+
+        $this->assertInstanceOf(
+            '\\Statsd\\Telegraf\\Client',
+            $client->incr('foo.bar', 1003, 1)
+        );
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage DUMMY ERROR IN TESTS
+     */
+    public function testClientReportsExceptionsFromCommands()
+    {
+        $socketMock = $this->mockSocketConnection();
+        $socketMock->expects($this->never())
+            ->method('send');
+
+        $commandMock = $this->getMock(
+            '\\Statsd\\Telegraf\\Client\\Command\\Counter',
+            array('decr')
+        );
+        $commandMock->expects($this->once())
+            ->method('decr')
+            ->with('foo.bar', 17, 1)
+            ->will(
+                $this->throwException(
+                    new \RuntimeException("DUMMY ERROR IN TESTS")
+                )
+            );
+
+        $client = new Client(array('connection' => $socketMock, 'throw_exception' => true));
+        $client->addCommand($commandMock);
+
+        $this->assertInstanceOf(
+            '\\Statsd\\Telegraf\\Client',
+            $client->decr('foo.bar', 17, 1)
+        );
+    }
+
+    public function testClientSupportsFluentApi_WithAllStandardCommands()
+    {
+        $socketMock = $this->mockSocketConnection();
+        $client = new Client(array('connection' => $socketMock));
+
+        $result = $client->incr('foo.bar')
+                        ->decr('foo.bar')
+                        ->timing('db.query', 1)
+                        ->set('ip.address', '127.0.0.1')
+                        ->gauge('cpu_percent', 10)
+                        ->gauge('cpu_percent', -2, true);
+
+        $this->assertInstanceOf('\\Statsd\\Telegraf\\Client', $result);
+    }
+
+    private function mockCommand()
+    {
+        return $this->getMockForAbstractClass(
+            '\\Statsd\\Client\\CommandInterface'
+        );
+    }
+
+    private function mockSocketConnection()
+    {
+        return $this->getMock(
+            '\\Statsd\\Client\\SocketConnection',
+            array('send'),
+            array(
+                array(
+                    'throw_exception' => false,
+                    'host' => 'foo.bar',
+                )
+            )
+        );
     }
 }
