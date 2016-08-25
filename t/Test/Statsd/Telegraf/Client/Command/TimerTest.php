@@ -80,42 +80,42 @@ class TimerTest extends \PHPUnit_Framework_TestCase
     public function testTimingAcceptsAnObjectMethodToCallAndTimeTheExecution()
     {
         $impl = new Timer();
-        $this->assertEquals(
-            'test.method.sleep:1000|ms',
-            $impl->timing('test.method.sleep', array($this, 'sleep1Second'), 1)
+        $this->assertRegExp(
+            '/test.method.sleep:\d+\|ms/',
+            $impl->timing('test.method.sleep', array($this, 'sleepABit'), 1)
         );
     }
 
-    public function sleep1Second()
+    public function sleepABit()
     {
-        sleep(1);
+        usleep(300000);
     }
 
     public function testTimingAcceptsAClassStaticMethodToCallAndTimeTheExecution()
     {
         $impl = new Timer();
-        $this->assertEquals(
-            'test.static.method.sleep:1000|ms',
+        $this->assertRegExp(
+            '/test.static.method.sleep:\d+\|ms/',
             $impl->timing(
                 'test.static.method.sleep',
-                array('\\Test\\Statsd\\Telegraf\\Client\\Command\\TimerTest', 'staticallySleep1Second'),
+                array('\\Test\\Statsd\\Telegraf\\Client\\Command\\TimerTest', 'staticallySleepABit'),
                 1
             )
         );
     }
 
-    public static function staticallySleep1Second()
+    public static function staticallySleepABit()
     {
-        sleep(1);
+        usleep(300000);
     }
 
     public function testTimingAcceptsAClosureToCallAndTimeTheExecution()
     {
-        $sleep1Sec = function () { sleep(1); };
+        $sleepABit = function () { usleep(300000); };
         $impl = new Timer();
-        $this->assertEquals(
-            'test.closure.sleep:1000|ms',
-            $impl->timing('test.closure.sleep', $sleep1Sec, 1)
+        $this->assertRegExp(
+            '/test.closure.sleep:\d+\|ms/',
+            $impl->timing('test.closure.sleep', $sleepABit, 1)
         );
     }
 
