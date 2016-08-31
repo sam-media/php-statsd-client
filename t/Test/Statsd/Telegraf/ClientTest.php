@@ -115,10 +115,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client = new Client(array('connection' => $socketMock, 'throw_exception' => true));
         $client->addCommand($commandMock);
 
-        $this->assertInstanceOf(
-            '\\Statsd\\Telegraf\\Client',
-            $client->decr('foo.bar', 17, 1)
-        );
+        $client->decr('foo.bar', 17, 1);
     }
 
     /**
