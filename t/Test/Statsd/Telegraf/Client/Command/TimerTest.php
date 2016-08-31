@@ -80,43 +80,61 @@ class TimerTest extends \PHPUnit_Framework_TestCase
     public function testTimingAcceptsAnObjectMethodToCallAndTimeTheExecution()
     {
         $impl = new Timer();
+
+        $metric = $impl->timing('test.method.sleep', array($this, 'sleepABit'), 1);
+        $regex = '/test.method.sleep:(?<elapsed>\d+)\|ms/';
+
         $this->assertRegExp(
-            '/test.method.sleep:\d+\|ms/',
-            $impl->timing('test.method.sleep', array($this, 'sleepABit'), 1)
+            $regex,
+            $metric
         );
+        preg_match($regex, $metric, $matches);
+        $this->assertGreaterThan(0, $matches['elapsed']);
     }
 
     public function sleepABit()
     {
-        usleep(300000);
+        usleep(1000);
     }
 
     public function testTimingAcceptsAClassStaticMethodToCallAndTimeTheExecution()
     {
         $impl = new Timer();
-        $this->assertRegExp(
-            '/test.static.method.sleep:\d+\|ms/',
-            $impl->timing(
-                'test.static.method.sleep',
-                array('\\Test\\Statsd\\Telegraf\\Client\\Command\\TimerTest', 'staticallySleepABit'),
-                1
-            )
+
+        $metric = $impl->timing(
+            'test.static.method.sleep',
+            array('\\Test\\Statsd\\Telegraf\\Client\\Command\\TimerTest', 'staticallySleepABit'),
+            1
         );
+        $regex = '/test.static.method.sleep:(?<elapsed>\d+)\|ms/';
+
+        $this->assertRegExp(
+            $regex,
+            $metric
+        );
+        preg_match($regex, $metric, $matches);
+        $this->assertGreaterThan(0, $matches['elapsed']);
     }
 
     public static function staticallySleepABit()
     {
-        usleep(300000);
+        usleep(1000);
     }
 
     public function testTimingAcceptsAClosureToCallAndTimeTheExecution()
     {
-        $sleepABit = function () { usleep(300000); };
+        $sleepABit = function () { usleep(1000); };
         $impl = new Timer();
+
+        $metric = $impl->timing('test.closure.sleep', $sleepABit, 1);
+        $regex = '/test.closure.sleep:(?<elapsed>\d+)\|ms/';
+
         $this->assertRegExp(
-            '/test.closure.sleep:\d+\|ms/',
-            $impl->timing('test.closure.sleep', $sleepABit, 1)
+            $regex,
+            $metric
         );
+        preg_match($regex, $metric, $matches);
+        $this->assertGreaterThan(0, $matches['elapsed']);
     }
 
     public function testTimingIncludesSampleRateInResult()

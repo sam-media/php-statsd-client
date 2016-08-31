@@ -36,7 +36,7 @@ class TimerTest extends \PHPUnit_Framework_TestCase
         $result = $inc->timing(
             'foo.bar',
             function () {
-                sleep(1);
+                usleep(1000);
             }
         );
         $this->assertRegExp(
