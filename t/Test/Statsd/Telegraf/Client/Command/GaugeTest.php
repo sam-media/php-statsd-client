@@ -118,7 +118,7 @@ class GaugeTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testGaugeReturnsNullWhenSampleRateIsLow()
+    public function testGaugeReturnsNullWhenSampleIsDiscarded()
     {
         $implMock = $this->mockGauge(array('genRand'));
         $implMock->expects($this->once())

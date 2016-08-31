@@ -133,7 +133,7 @@ class TimerTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testTimingReturnsNullWhenSampleRateIsLow()
+    public function testTimingReturnsNullWhenSampleIsDiscarded()
     {
         $implMock = $this->mockTimer(array('genRand'));
         $implMock->expects($this->once())

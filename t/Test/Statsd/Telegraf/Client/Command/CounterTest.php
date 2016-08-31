@@ -91,7 +91,7 @@ class CounterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testIncrReturnsNullWhenSampleRateIsLow()
+    public function testIncrReturnsNullWhenSampleIsDiscarded()
     {
         $implMock = $this->mockCounter(array('genRand'));
         $implMock->expects($this->once())
@@ -149,7 +149,7 @@ class CounterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testDecrReturnsNullWhenSampleRateIsLow()
+    public function testDecrReturnsNullWhenSampleRateIsDiscarded()
     {
         $implMock = $this->mockCounter(array('genRand'));
         $implMock->expects($this->once())

@@ -91,7 +91,7 @@ class SetTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testSetReturnsNullWhenSampleRateIsLow()
+    public function testSetReturnsNullWhenSampleIsDiscarded()
     {
         $implMock = $this->mockSet(array('genRand'));
         $implMock->expects($this->once())
