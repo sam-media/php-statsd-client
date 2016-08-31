@@ -11,11 +11,6 @@ abstract class AbstractCommand implements CommandInterface
     protected $defaultTags = array();
 
     /**
-     * @return array
-     */
-    abstract public function getCommands();
-
-    /**
      * @param array       associative array of tag name => value
      * @return \Statsd\Telegraf\Client\Command\AbstractCommand self reference
      */
