@@ -17,7 +17,7 @@ class Timer extends \Statsd\Client\Command
 
     public function timing($stat, $delta, $rate=1)
     {
-        if($this->isClosure($delta)){
+        if ($this->isClosure($delta)) {
             $start_time = gettimeofday(true);
             $delta();
             $end_time = gettimeofday(true);

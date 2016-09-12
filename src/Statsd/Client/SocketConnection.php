@@ -19,7 +19,6 @@ class SocketConnection implements ConnectionInterface
     public function openSocket()
     {
         try {
-
             $this->socket = $this->fsockopen(
                 sprintf(
                     "udp://%s",
@@ -27,7 +26,7 @@ class SocketConnection implements ConnectionInterface
                 ),
                 $this->settings['port']
             );
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             if($this->settings['throw_exception'] == true) {
                 throw $e;
             }
@@ -37,7 +36,7 @@ class SocketConnection implements ConnectionInterface
 
     private function fsockopen($host, $port)
     {
-        return fsockopen($host, $port); 
+        return fsockopen($host, $port);
     }
 
     public function send($string)
@@ -46,7 +45,7 @@ class SocketConnection implements ConnectionInterface
             if (trim($string)) {
                 return $this->fwrite($this->socket, $string);
             }
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             if($this->settings['throw_exception'] == true) {
                 throw $e;
             }

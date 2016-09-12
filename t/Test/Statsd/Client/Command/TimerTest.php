@@ -16,7 +16,7 @@ class TimerTest extends \PHPUnit_Framework_TestCase
     {
         $inc = new \Statsd\Client\Command\Timer();
         $class = new \ReflectionClass('\Statsd\Client\Command\Timer');
-        foreach($inc->getCommands() as $cmd){
+        foreach ($inc->getCommands() as $cmd) {
             $method = $class->getMethod($cmd);
         }
     }
@@ -36,7 +36,7 @@ class TimerTest extends \PHPUnit_Framework_TestCase
         $result = $inc->timing(
             'foo.bar',
             function () {
-                sleep(1);
+                usleep(1000);
             }
         );
         $this->assertRegExp(

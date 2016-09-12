@@ -1,22 +1,34 @@
 <?php
 namespace Statsd;
-          
+
+use \Statsd\Client\CommandInterface;
+
 class Client
 {
-
     protected $commands = array();
+
+    /**
+     * Returns associative array of deafult settings.
+     *
+     * @return array
+     */
+    protected static function getDefaultSettings()
+    {
+        return array(
+                    'prefix' => '',
+                    'throw_exception' => false,
+                    'connection' => null
+                );
+    }
 
     public function __construct(array $settings=array())
     {
         $this->settings = array_merge(
-            array(
-                'prefix' => '',
-                'throw_exception' => false,
-                'connection' => null,
-            ),
+            static::getDefaultSettings(),
             $settings
         );
-        if($this->settings['connection'] == null){
+
+        if ($this->settings['connection'] == null) {
             $this->connection = new Client\SocketConnection($this->settings);
         } else {
             $this->connection = $this->settings['connection'];
@@ -24,7 +36,7 @@ class Client
         $this->registerCommands();
     }
 
-    private function registerCommands()
+    protected function registerCommands()
     {
         $commands = array(
            '\Statsd\Client\Command\Counter',
@@ -33,35 +45,24 @@ class Client
            '\Statsd\Client\Command\Gauge',
         );
 
-        foreach($commands as $cmd) {
+        foreach ($commands as $cmd) {
             $this->addCommand(new $cmd);
         }
     }
 
-    public function addCommand($cmd_obj)
+    /**
+     * @param \Statsd\Client\CommandInterface
+     */
+    public function addCommand(CommandInterface $cmdObj)
     {
-        $class = new \ReflectionObject($cmd_obj);
-        $instanceof =  in_array(
-            'Statsd\Client\CommandInterface',
-            array_keys(class_implements($cmd_obj))
-        );
-        if(!$instanceof) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    "%s::addCommand() accept class that implements CommandInterface",
-                    __CLASS__
-                )
-            );
-        }
-
-        foreach($cmd_obj->getCommands() as $cmd){
-            $this->commands[$cmd] = $cmd_obj;
+        foreach ($cmdObj->getCommands() as $cmd) {
+            $this->commands[$cmd] = $cmdObj;
         }
     }
 
     public function __call($name, $arguments)
     {
-        if(!array_key_exists($name, $this->commands)) {
+        if (!array_key_exists($name, $this->commands) ) {
             throw new \BadFunctionCallException(
                 sprintf(
                     "Call to undefined method %s::%s()",
@@ -75,7 +76,7 @@ class Client
             if (!trim($command)) {
                 return $this;
             }
-            if(trim($this->getPrefix())){
+            if (trim($this->getPrefix())) {
                 $command = sprintf(
                     "%s.%s",
                     $this->getPrefix(),
@@ -83,19 +84,19 @@ class Client
                 );
             }
             $this->connection->send($command);
-        } catch(\Exception $e) {
-            if($this->settings['throw_exception'] == true) {
+        } catch (\Exception $e) {
+            if ($this->settings['throw_exception'] == true) {
                 throw $e;
             }
         }
         return $this;
     }
 
-    private function callCommand($name, $arguments)
+    protected function callCommand($name, $arguments)
     {
-        $cmd_obj = $this->commands[$name];
+        $cmdObj = $this->commands[$name];
         return call_user_func_array(
-            array($cmd_obj, $name),
+            array($cmdObj, $name),
             $arguments
         );
     }

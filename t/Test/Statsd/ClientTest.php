@@ -41,16 +41,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $statsd->fooFunc("foo", "bar");
     }
 
-    /**
-     * @expectedException InvalidArgumentException 
-     * @expectedExceptionMessage Statsd\Client::addCommand() accept class that implements CommandInterface
-     */
-    public function testClientWithWrongCommandObject()
-    {
-        $statsd = new \Statsd\Client();
-        $statsd->addCommand(new \StdClass());
-    }
-
     public function getMockUpSocketConnection()
     {
         return $this->getMock(
@@ -69,7 +59,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testClientAddCommand()
     {
-        $sc = $this->getMockUpSocketConnection();    
+        $sc = $this->getMockUpSocketConnection();
         $sc->expects($this->once())
             ->method('send')
             ->with("foo.bar:1|c");
@@ -78,7 +68,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $statsd->addCommand(
             new \Statsd\Client\Command\Counter()
         );
-        
+
         $this->assertInstanceOf(
             '\Statsd\Client',
             $statsd->incr('foo.bar', 1)
@@ -87,7 +77,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testClientCallCommandWithPrefix()
     {
-        $sc = $this->getMockUpSocketConnection();    
+        $sc = $this->getMockUpSocketConnection();
         $sc->expects($this->once())
             ->method('send')
             ->with("top.foo.bar:1|c");
@@ -97,7 +87,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             new \Statsd\Client\Command\Counter()
         );
         $statsd->setPrefix('top');
-        
+
         $this->assertInstanceOf(
             '\Statsd\Client',
             $statsd->incr('foo.bar', 1)
@@ -137,5 +127,4 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             $result
         );
     }
-
 }
