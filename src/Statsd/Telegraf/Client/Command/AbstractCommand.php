@@ -11,6 +11,11 @@ abstract class AbstractCommand implements CommandInterface
     protected $defaultTags = array();
 
     /**
+     * @var boolean
+     */
+    protected $shouldMergeTags = true;
+
+    /**
      * @param array       associative array of tag name => value
      * @return \Statsd\Telegraf\Client\Command\AbstractCommand self reference
      */
@@ -26,6 +31,24 @@ abstract class AbstractCommand implements CommandInterface
     public function getDefaultTags()
     {
         return $this->defaultTags;
+    }
+
+    /**
+     * @param boolean
+     * @return \Statsd\Telegraf\Client\Command\AbstractCommand self reference
+     */
+    public function setMergeTags($shouldMerge)
+    {
+        $this->shouldMergeTags = (bool) $shouldMerge;
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function shouldMergeTags()
+    {
+        return $this->shouldMergeTags;
     }
 
     /**
@@ -53,7 +76,11 @@ abstract class AbstractCommand implements CommandInterface
      */
     protected function getStatWithTags($stat, array $statTags=array())
     {
-        $tags = $statTags ? $statTags : $this->getDefaultTags();
+        if ($this->shouldMergeTags()) {
+          $tags = array_merge($this->getDefaultTags(), $statTags);
+        } else {
+          $tags = $statTags ? $statTags : $this->getDefaultTags();
+        }
         if (!$tags) {
             return $stat;
         }

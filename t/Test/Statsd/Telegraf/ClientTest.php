@@ -15,6 +15,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $allSettings = $client->getSettings();
         $this->assertFalse($allSettings['throw_exception']);
         $this->assertEquals(array(), $allSettings['default_tags']);
+        $this->assertTrue($allSettings['merge_tags']);
     }
 
     /**
@@ -37,6 +38,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $defaultSettings = array(
             'throw_exception' => false,
             'default_tags' => array(),
+            'merge_tags' => true,
             'connection' => null,
             'prefix' => ''
         );
@@ -50,10 +52,15 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $tagsAndExceptionsSettings['throw_exception'] = true;
         $tagsAndExceptionsParams = array('default_tags' => array('region' => 'world'), 'throw_exception' => true);
 
+        $noMergeTagsSettings = $defaultSettings;
+        $noMergeTagsSettings['merge_tags'] = false;
+        $noMergeTagsParams = array('merge_tags' => false);
+
         return array(
             'empty params' => array($defaultSettings, array()),
             'prefix params' => array($prefixSettings, $prefixParams),
             'tags and throw_exception params' => array($tagsAndExceptionsSettings, $tagsAndExceptionsParams),
+            'no merge tags' => array($noMergeTagsSettings, $noMergeTagsParams),
         );
     }
 
@@ -148,6 +155,50 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testCommandMergeTagsIfMergeTagsIsEnabled()
+    {
+        $expectedRequest = 'event.ok,region=world,severity=low:2|c';
+        $defaultTags = array('region' => 'world');
+        $tags = array('severity' => 'low');
+
+        $socketMock = $this->mockSocketConnection();
+        $socketMock->expects($this->once())->method('send')->with($expectedRequest);
+        $client = new Client(
+            array(
+                'connection' => $socketMock,
+                'default_tags' => $defaultTags,
+                'merge_tags' => true,
+            )
+        );
+
+        $this->assertInstanceOf(
+            '\\Statsd\\Telegraf\\Client',
+            $client->incr('event.ok', 2, 1, $tags)
+        );
+    }
+
+    public function testCommandWontMergeTagsIfMergeTagsIsDisabled()
+    {
+        $expectedRequest = 'event.ok,severity=low:2|c';
+        $defaultTags = array('region' => 'world');
+        $tags = array('severity' => 'low');
+
+        $socketMock = $this->mockSocketConnection();
+        $socketMock->expects($this->once())->method('send')->with($expectedRequest);
+        $client = new Client(
+            array(
+                'connection' => $socketMock,
+                'default_tags' => $defaultTags,
+                'merge_tags' => false
+            )
+        );
+
+        $this->assertInstanceOf(
+            '\\Statsd\\Telegraf\\Client',
+            $client->incr('event.ok', 2, 1, $tags)
+        );
+    }
+
     /**
      * @dataProvider provideParamsForDecrAndExpectedRequest
      */
@@ -174,7 +225,14 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         return array(
             'no tags' => array('event:-1|c', array(), 'event', 1, array()),
             'with default tags' => array('event.bad,region=world:-2|c', array('region' => 'world'), 'event.bad', 2, array()),
-            'with tags' => array('event.bad,region=world:-3|c', array(), 'event.bad', 3, array('region' => 'world'))
+            'with tags' => array('event.bad,region=world:-3|c', array(), 'event.bad', 3, array('region' => 'world')),
+            'with tags and default tags' => array(
+                'event.bad,region=world,severity=low:-3|c',
+                array('region' => 'world'),
+                'event.bad',
+                3,
+                array('severity'=>'low')
+            ),
         );
     }
 

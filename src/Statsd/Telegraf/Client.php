@@ -21,7 +21,8 @@ class Client extends \Statsd\Client
                     'prefix' => '',
                     'throw_exception' => false,
                     'connection' => null,
-                    'default_tags' => array()
+                    'default_tags' => array(),
+                    'merge_tags' => true,
                 );
     }
 
@@ -39,6 +40,7 @@ class Client extends \Statsd\Client
     protected function registerCommands()
     {
         $tags = $this->getDefaultTags();
+        $mergeTags = (bool) $this->settings['merge_tags'];
 
         $commands = array(
            new Counter(),
@@ -49,6 +51,7 @@ class Client extends \Statsd\Client
 
         foreach ($commands as $command) {
             $command->setDefaultTags($tags);
+            $command->setMergeTags($mergeTags);
             $this->addCommand($command);
         }
     }
