@@ -7,7 +7,7 @@
         "graphite"
     ],
     "homepage": "https://github.com/sam-media/php-statsd-client",
-    "license": "",
+    "license": "MIT",
     "authors": [
         {
             "name": "Milad Rastian",
