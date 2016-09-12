@@ -155,6 +155,27 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * Ensure our rate sampling logic gets executed during tests at least once for
+     * a rate different than '1'
+     */
+    public function testSamplingRateApplies()
+    {
+        $socketMock = $this->mockSocketConnection();
+        $socketMock->expects($this->never())->method('send');
+        $client = new Client(array('connection' => $socketMock));
+
+        // There is a really small chance this test will give a false positive.
+        // Sorry for that.
+        $tags = array();
+        $rate = 0.0000000000000001;
+
+        $this->assertInstanceOf(
+            '\\Statsd\\Telegraf\\Client',
+            $client->incr('event.ok', 2, $rate, $tags)
+        );
+    }
+
     public function testCommandMergeTagsIfMergeTagsIsEnabled()
     {
         $expectedRequest = 'event.ok,region=world,severity=low:2|c';
