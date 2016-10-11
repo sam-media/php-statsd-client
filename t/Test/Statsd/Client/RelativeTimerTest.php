@@ -21,6 +21,22 @@ class RelativeTimerTest extends \PHPUnit_Framework_TestCase
         $this->assertGreaterThanOrEqual($testStart, $timer->getReferenceTimestamp());
     }
 
+    public function testSendDurationSinceReference()
+    {
+        $self = $this;
+
+        $sockMock = $this->mockConnection();
+        $sockMock->expects($this->once())->method('send')
+            ->with(
+                $this->matchesRegularExpression('/^foo\.bar\:\d{1,2}\|ms/')
+            );
+
+        $client =  new Client(array('connection' => $sockMock));
+
+        $timer = new RelativeTimer($client);
+        $timer->send('foo.bar');
+    }
+
     public function testSendReturnsTimerSelfReferenceForFluentApi()
     {
         $timer = new RelativeTimer($this->createClientWithMockedSocket());
