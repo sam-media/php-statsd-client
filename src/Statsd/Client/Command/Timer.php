@@ -78,7 +78,7 @@ class Timer extends \Statsd\Client\Command
         }
 
         $startTime = gettimeofday(true);
-        $callable();
+        call_user_func($callable);
         $endTime = gettimeofday(true);
         $delta = ($endTime - $startTime) * 1000;
 
