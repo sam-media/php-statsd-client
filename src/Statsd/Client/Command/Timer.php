@@ -12,11 +12,6 @@ class Timer extends \Statsd\Client\Command
         return $this->commands;
     }
 
-    private function isClosure($var)
-    {
-        return is_object($var) && ($var instanceof \Closure);
-    }
-
     /**
      * Send timing stats, provide the timing metric in milliseconds.
      *
@@ -24,6 +19,7 @@ class Timer extends \Statsd\Client\Command
      * of the duration, so the callable is measrued and timing is sent.
      * This behavior is deprecated (will be removed in future versions),
      * use timeCallable() instead.
+     * Now an E_USER_DEPRECATED warning is triggered.
      *
      * @param string $stat the metric name
      * @param int $delta duration in milliseconds
@@ -32,18 +28,16 @@ class Timer extends \Statsd\Client\Command
      */
     public function timing($stat, $delta, $rate=1)
     {
-        if ($this->isClosure($delta)) {
-            $startTime = gettimeofday(true);
-            $delta();
-            $endTime = gettimeofday(true);
-            $delta = ($endTime - $startTime) * 1000;
+        if ($this->isCallable($delta)) {
+            trigger_error(
+                'Passing callables to timing() is deprecated. Use timeCallable() instead',
+                E_USER_DEPRECATED
+            );
+            $result = $this->timeCallable($stat, $delta, $rate);
+        } else {
+            $result = $this->prepare($stat, sprintf('%d|ms', $delta), $rate);
         }
-
-        return $this->prepare(
-            $stat,
-            sprintf('%d|ms', $delta),
-            $rate
-        );
+        return $result;
     }
 
     /**

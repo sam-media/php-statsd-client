@@ -34,8 +34,16 @@ class TimerTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testTimingWithClosure()
+    public function testTimingWithClosureTriggersWarning()
     {
+        $deprecatedWarningGenerated = false;
+
+        $setDeprecatedWarning = function () use (&$deprecatedWarningGenerated) {
+            $deprecatedWarningGenerated = true;
+        };
+
+        set_error_handler($setDeprecatedWarning, E_USER_DEPRECATED);
+
         $timer = new Timer();
         $result = $timer->timing(
             'foo.bar',
@@ -43,10 +51,11 @@ class TimerTest extends \PHPUnit_Framework_TestCase
                 usleep(1000);
             }
         );
-        $this->assertRegExp(
-            '/foo.bar:\d+|ms/',
-            $result
-        );
+
+        restore_error_handler();
+
+        $this->assertRegExp('/foo.bar:\d+|ms/', $result);
+        $this->assertTrue($deprecatedWarningGenerated);
     }
 
     public function testTimingSince()
