@@ -2,6 +2,7 @@
 namespace Statsd;
 
 use \Statsd\Client\CommandInterface;
+use Statsd\Client\RelativeTimer;
 
 class Client
 {
@@ -115,5 +116,17 @@ class Client
     {
         $this->settings['prefix'] = $prefix;
         return $this;
+    }
+
+    /**
+     * Returns a RelativeTimer that can be used to send timing metrics
+     * since a given time reference (now by default).
+     *
+     * @param int|null  $reference (default is now)
+     * @return \Statsd\Client\RelativeTimer
+     */
+    public function createRelativeTimer($reference = null)
+    {
+        return new RelativeTimer($this, $reference);
     }
 }

@@ -128,4 +128,21 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             $result
         );
     }
+
+    public function testCreateRelativeTimerUsesClientToSendMetrics()
+    {
+        $now = microtime(true);
+        $socketMock = $this->getMockUpSocketConnection();
+        $socketMock->expects($this->once())
+            ->method('send')
+            ->with($this->matchesRegularExpression('/^foo.bar:\d+|ms$/'));
+
+        $statsd = new Client(array('connection' => $socketMock));
+        $timer = $statsd->createRelativeTimer($now);
+        $this->assertInstanceOf('\Statsd\Client\RelativeTimer', $timer);
+        $this->assertEquals($now, $timer->getReferenceTimestamp());
+        $this->assertSame($statsd, $timer->getClient());
+
+        $timer->send('foo.bar');
+    }
 }
