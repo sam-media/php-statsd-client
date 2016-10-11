@@ -19,4 +19,19 @@ abstract class Command implements CommandInterface
     {
         return (float) mt_rand() / (float) mt_getrandmax();
     }
+
+    /**
+     * @param  mixed   $callable
+     * @return bool
+     */
+    protected function isCallable($callable)
+    {
+        if (is_array($callable)) {
+            if (count($callable) !== 2) {
+                return false;
+            }
+            return method_exists($callable[0], $callable[1]);
+        }
+        return is_callable($callable);
+    }
 }
