@@ -145,6 +145,8 @@ class TimerTest extends \PHPUnit_Framework_TestCase
         $impl = new Timer();
         $metric = $impl->timing('test.closure.sleep', $sleepABit, 1);
 
+        restore_error_handler();
+
         $regex = '/test.closure.sleep:(?<elapsed>\d+)\|ms/';
         $this->assertRegExp($regex, $metric);
         preg_match($regex, $metric, $matches);
@@ -240,6 +242,33 @@ class TimerTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(0.85)
         );
         $this->assertNull($implMock->timeCallable('foo.bar', 'time', 0.5));
+    }
+
+    /**
+     * @dataProvider provideNoneCallableValues
+     */
+    public function testTimeCallableThrowsExceptionOnNoneCallableParams($noneCallable)
+    {
+        $timer = new Timer();
+        $this->setExpectedException('\InvalidArgumentException');
+        $timer->timeCallable('foo.bar', $noneCallable);
+    }
+
+    public static function provideNoneCallableValues()
+    {
+        $self = new self();
+        return array(
+            'integer' => array(100),
+            'float' => array(302.455),
+            'bool flase' => array(false),
+            'bool true' => array(true),
+            'string' => array('no such function exists'),
+            'array' => array(array(1,2)),
+            'object' => array($self),
+            'class' => array('\\PHPUnit_Framework_TestCase'),
+            'object in array' => array(array($self)),
+            'class in array' => array('\\Test\\Statsd\\Telegraf\\Client\\Command\\TimerTest')
+        );
     }
 
     private function mockTimer(array $methods=array())
