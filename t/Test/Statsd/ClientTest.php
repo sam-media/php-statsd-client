@@ -135,7 +135,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $socketMock = $this->getMockUpSocketConnection();
         $socketMock->expects($this->once())
             ->method('send')
-            ->with($this->matchesRegularExpression('/^foo.bar:\d+|ms$/'));
+            ->with($this->matchesRegularExpression('/^foo.bar:\d+\|ms$/'));
 
         $statsd = new Client(array('connection' => $socketMock));
         $stopWatch = $statsd->createStopWatch($now);
