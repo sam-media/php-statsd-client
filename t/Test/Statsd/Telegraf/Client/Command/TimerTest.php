@@ -79,17 +79,22 @@ class TimerTest extends \PHPUnit_Framework_TestCase
 
     public function testTimingAcceptsAnObjectMethodToCallAndTimeTheExecution()
     {
-        $impl = new Timer();
+        $deprecatedWarningGenerated = false;
+        $setDeprecatedWarning = function () use (&$deprecatedWarningGenerated) {
+            $deprecatedWarningGenerated = true;
+        };
+        set_error_handler($setDeprecatedWarning, E_USER_DEPRECATED);
 
-        $metric = $impl->timing('test.method.sleep', array($this, 'sleepABit'), 1);
+        $timer = new Timer();
+        $metric = $timer->timing('test.method.sleep', array($this, 'sleepABit'), 1);
+
+        restore_error_handler();
+
         $regex = '/test.method.sleep:(?<elapsed>\d+)\|ms/';
-
-        $this->assertRegExp(
-            $regex,
-            $metric
-        );
+        $this->assertRegExp($regex, $metric);
         preg_match($regex, $metric, $matches);
         $this->assertGreaterThan(0, $matches['elapsed']);
+        $this->assertTrue($deprecatedWarningGenerated);
     }
 
     public function sleepABit()
@@ -99,21 +104,27 @@ class TimerTest extends \PHPUnit_Framework_TestCase
 
     public function testTimingAcceptsAClassStaticMethodToCallAndTimeTheExecution()
     {
-        $impl = new Timer();
+        $deprecatedWarningGenerated = false;
+        $setDeprecatedWarning = function () use (&$deprecatedWarningGenerated) {
+            $deprecatedWarningGenerated = true;
+        };
+        set_error_handler($setDeprecatedWarning, E_USER_DEPRECATED);
 
+        $impl = new Timer();
         $metric = $impl->timing(
             'test.static.method.sleep',
             array('\\Test\\Statsd\\Telegraf\\Client\\Command\\TimerTest', 'staticallySleepABit'),
             1
         );
+
+        restore_error_handler();
+
         $regex = '/test.static.method.sleep:(?<elapsed>\d+)\|ms/';
 
-        $this->assertRegExp(
-            $regex,
-            $metric
-        );
+        $this->assertRegExp($regex, $metric);
         preg_match($regex, $metric, $matches);
         $this->assertGreaterThan(0, $matches['elapsed']);
+        $this->assertTrue($deprecatedWarningGenerated);
     }
 
     public static function staticallySleepABit()
@@ -123,18 +134,22 @@ class TimerTest extends \PHPUnit_Framework_TestCase
 
     public function testTimingAcceptsAClosureToCallAndTimeTheExecution()
     {
+        $deprecatedWarningGenerated = false;
+        $setDeprecatedWarning = function () use (&$deprecatedWarningGenerated) {
+            $deprecatedWarningGenerated = true;
+        };
+        set_error_handler($setDeprecatedWarning, E_USER_DEPRECATED);
+
         $sleepABit = function () { usleep(1000); };
+
         $impl = new Timer();
-
         $metric = $impl->timing('test.closure.sleep', $sleepABit, 1);
-        $regex = '/test.closure.sleep:(?<elapsed>\d+)\|ms/';
 
-        $this->assertRegExp(
-            $regex,
-            $metric
-        );
+        $regex = '/test.closure.sleep:(?<elapsed>\d+)\|ms/';
+        $this->assertRegExp($regex, $metric);
         preg_match($regex, $metric, $matches);
         $this->assertGreaterThan(0, $matches['elapsed']);
+        $this->assertTrue($deprecatedWarningGenerated);
     }
 
     public function testTimingIncludesSampleRateInResult()

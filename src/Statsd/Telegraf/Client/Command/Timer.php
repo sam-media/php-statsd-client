@@ -22,13 +22,16 @@ class Timer extends AbstractCommand
     public function timing($stat, $delta, $rate=1, array $tags=array())
     {
         if ($this->isCallable($delta)) {
-            $startTime = gettimeofday(true);
-            call_user_func($delta);
-            $endTime = gettimeofday(true);
-            $delta = ($endTime - $startTime) * 1000;
+            trigger_error(
+                'Passing callables to timing() is deprecated. Use timeCallable() instead',
+                E_USER_DEPRECATED
+            );
+            $result = $this->timeCallable($stat, $delta, $rate, $tags);
+        } else {
+            $result = $this->prepare($stat, sprintf('%d|ms', $delta), $rate, $tags);
         }
 
-        return $this->prepare($stat, sprintf('%d|ms', $delta), $rate, $tags);
+        return $result;
     }
 
     /**
