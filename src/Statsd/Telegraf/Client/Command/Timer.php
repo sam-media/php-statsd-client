@@ -16,10 +16,10 @@ class Timer extends AbstractCommand
      * @param string          $stat      metric name
      * @param int|callable    $delta     time delta in miliseconds, or callable to call
      * @param float           $rate      sample rate
-     * @param array           $tags      associative array of tag name => values
+     * @param array           $tags      associative array of tag name => value
      * @return string|null
      */
-    public function timing($stat, $delta, $rate=1, array $tags=array())
+    public function timing($stat, $delta, $rate = 1, array $tags = array())
     {
         if ($this->isCallable($delta)) {
             trigger_error(
@@ -38,11 +38,11 @@ class Timer extends AbstractCommand
      * @param string          $stat
      * @param callable        $callable
      * @param float           $rate      sample rate
-     * @param array           $tags      associative array of tag name => values
+     * @param array           $tags      associative array of tag name => value
      * @return string|null
      * @throws \InvalidArgumentException
      */
-    public function timeCallable($stat, $callable, $rate=1, array $tags=array())
+    public function timeCallable($stat, $callable, $rate = 1, array $tags = array())
     {
         if (!$this->isCallable($callable)) {
             throw new InvalidArgumentException(

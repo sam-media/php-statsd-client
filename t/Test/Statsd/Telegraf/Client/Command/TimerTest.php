@@ -234,6 +234,21 @@ class TimerTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testTimeCallableIncludesSampleRateInResult()
+    {
+        $implMock = $this->mockTimer(array('genRand'));
+        $implMock->expects($this->once())
+                ->method('genRand')
+                ->will($this->returnValue(0.45)
+        );
+        $sleepABit = function () { usleep(100); };
+
+        $this->assertRegExp(
+            '/foo.bar:\d+\|ms\|@0.6/',
+            $implMock->timeCallable('foo.bar', $sleepABit, 0.6)
+        );
+    }
+
     public function testTimeCallableReturnsNullWhenSampleIsDiscarded()
     {
         $implMock = $this->mockTimer(array('genRand'));
