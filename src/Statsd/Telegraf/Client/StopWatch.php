@@ -1,19 +1,19 @@
 <?php
-namespace Statsd\Client;
+namespace Statsd\Telegraf\Client;
 
 use Statsd\AbstractStopWatch;
-use Statsd\Client;
+use Statsd\Telegraf\Client;
 
 class StopWatch extends AbstractStopWatch
 {
-    /**@var \Statsd\Client */
+    /**@var \Statsd\Telegraf\Client */
     protected $client = null;
 
     /**
      * StopWatch object to easily send timing stats metrics
      *
      * @param \Statsd\Client $client
-     * @param float reference timestamp
+     * @param float reference timestamp (seconds)
      */
     public function __construct(Client $client, $reference = null)
     {
@@ -24,7 +24,7 @@ class StopWatch extends AbstractStopWatch
     /**
      * Returns the statsd client used to send metrics
      *
-     * @return \Statsd\Client
+     * @return \Statsd\Telegraf\Client
      */
     public function getClient()
     {
@@ -34,13 +34,14 @@ class StopWatch extends AbstractStopWatch
     /**
      * Send metrics with duration passed since the reference time
      *
-     * @param string $metric
-     * @param int|float $rate sample rate
-     * @return \Statsd\Client\StopWatch self reference
+     * @param string    $metric metric name
+     * @param int|float $rate   sample rate
+     * @param array     $tags   associative array of tags
+     * @return \Statsd\Telegraf\Client\StopWatch        self reference
      */
-    public function send($metric, $rate = 1)
+    public function send($metric, $rate = 1, array $tags = array())
     {
-        $this->client->timing($metric, $this->elapsedMilliseconds(), $rate);
+        $this->client->timing($metric, $this->elapsedMilliseconds(), $rate, $tags);
         return $this;
     }
 }
