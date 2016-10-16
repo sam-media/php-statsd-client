@@ -161,6 +161,72 @@ class TimerTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($implMock->timing('foo.bar', 1 , 0.5));
     }
 
+    /**
+     * @dataProvider provideCallableValues
+     */
+    public function testTimeCallableWitoutTags($callable)
+    {
+        $timer = new Timer();
+        $result = $timer->timeCallable('foo.bar', $callable, 1);
+        $this->assertRegExp('/foo.bar:\d+\|ms/', $result);
+    }
+
+    /**
+     * @dataProvider provideCallableValues
+     */
+    public function testTimeCallableWithTags($callable)
+    {
+        $timer = new Timer();
+        $result = $timer->timeCallable('foo.bar', $callable, 1, array('region' => 'world'));
+        $this->assertRegExp('/foo.bar,region=world:\d+\|ms/', $result);
+    }
+
+    /**
+     * @dataProvider provideCallableValues
+     */
+    public function testTimeCallableWithDefaultTags($callable)
+    {
+        $timer = new Timer();
+        $timer->setDefaultTags(array('tag1' => 'val1', 'tag2' => 'val2'));
+        $result = $timer->timeCallable('foo.bar', $callable, 1);
+        $this->assertRegExp('/foo.bar,tag1=val1,tag2=val2:\d+\|ms/', $result);
+    }
+
+    /**
+     * @dataProvider provideCallableValues
+     */
+    public function testTimeCallableWithDefaultTagsAndMetricTags($callable)
+    {
+        $timer = new Timer();
+        $timer->setDefaultTags(array('tag1' => 'val1', 'region' => 'world'));
+        $result = $timer->timeCallable('foo.bar', $callable, 1, array('pri'=>'low'));
+        $this->assertRegExp('/foo.bar,tag1=val1,region=world,pri=low:\d+\|ms/', $result);
+    }
+
+    public function provideCallableValues()
+    {
+        $simpleClosure = function () { usleep(1); };
+
+        return array(
+            'function name string' => array('time'),
+            'closure' => array($simpleClosure),
+            'object method array' => array(array($this, 'sleepABit')),
+            'class method array' => array(
+                array('\\Test\\Statsd\\Telegraf\\Client\\Command\\TimerTest', 'staticallySleepABit')
+            ),
+        );
+    }
+
+    public function testTimeCallableReturnsNullWhenSampleIsDiscarded()
+    {
+        $implMock = $this->mockTimer(array('genRand'));
+        $implMock->expects($this->once())
+            ->method('genRand')
+            ->will($this->returnValue(0.85)
+        );
+        $this->assertNull($implMock->timeCallable('foo.bar', 'time', 0.5));
+    }
+
     private function mockTimer(array $methods=array())
     {
         $implMock = $this->getMock(

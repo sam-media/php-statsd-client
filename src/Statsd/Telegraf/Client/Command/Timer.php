@@ -1,6 +1,7 @@
 <?php
 namespace Statsd\Telegraf\Client\Command;
 
+use InvalidArgumentException;
 
 class Timer extends AbstractCommand
 {
@@ -26,6 +27,28 @@ class Timer extends AbstractCommand
             $endTime = gettimeofday(true);
             $delta = ($endTime - $startTime) * 1000;
         }
+
+        return $this->prepare($stat, sprintf('%d|ms', $delta), $rate, $tags);
+    }
+
+    /**
+     * @param string          $stat
+     * @param callable        $callable
+     * @param float           $rate      sample rate
+     * @param array           $tags      associative array of tag name => values
+     * @return string|null
+     * @throws \InvalidArgumentException
+     */
+    public function timeCallable($stat, $callable, $rate=1, array $tags=array())
+    {
+        if (!$this->isCallable($callable)) {
+            throw new InvalidArgumentException(
+                "Can not time none-callable arguments");
+        }
+        $startTime = gettimeofday(true);
+        call_user_func($callable);
+        $endTime = gettimeofday(true);
+        $delta = ($endTime - $startTime) * 1000;
 
         return $this->prepare($stat, sprintf('%d|ms', $delta), $rate, $tags);
     }
