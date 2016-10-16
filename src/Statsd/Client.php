@@ -2,7 +2,7 @@
 namespace Statsd;
 
 use \Statsd\Client\CommandInterface;
-use Statsd\Client\RelativeTimer;
+use Statsd\Client\StopWatch;
 
 class Client
 {
@@ -119,14 +119,14 @@ class Client
     }
 
     /**
-     * Returns a RelativeTimer that can be used to send timing metrics
+     * Returns a StopWatch that can be used to send timing metrics
      * since a given time reference (now by default).
      *
      * @param int|null  $reference (default is now)
-     * @return \Statsd\Client\RelativeTimer
+     * @return \Statsd\Client\StopWatch
      */
-    public function createRelativeTimer($reference = null)
+    public function createStopWatch($reference = null)
     {
-        return new RelativeTimer($this, $reference);
+        return new StopWatch($this, $reference);
     }
 }

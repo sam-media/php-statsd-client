@@ -129,7 +129,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testCreateRelativeTimerUsesClientToSendMetrics()
+    public function testCreateStopWatchUsesClientToSendMetrics()
     {
         $now = microtime(true);
         $socketMock = $this->getMockUpSocketConnection();
@@ -138,11 +138,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             ->with($this->matchesRegularExpression('/^foo.bar:\d+|ms$/'));
 
         $statsd = new Client(array('connection' => $socketMock));
-        $timer = $statsd->createRelativeTimer($now);
-        $this->assertInstanceOf('\Statsd\Client\RelativeTimer', $timer);
-        $this->assertEquals($now, $timer->getReferenceTimestamp());
-        $this->assertSame($statsd, $timer->getClient());
+        $stopWatch = $statsd->createStopWatch($now);
+        $this->assertInstanceOf('\Statsd\Client\StopWatch', $stopWatch);
+        $this->assertEquals($now, $stopWatch->getReferenceTimestamp());
+        $this->assertSame($statsd, $stopWatch->getClient());
 
-        $timer->send('foo.bar');
+        $stopWatch->send('foo.bar');
     }
 }

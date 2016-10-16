@@ -3,7 +3,7 @@ namespace Statsd\Client;
 
 use Statsd\Client;
 
-class RelativeTimer
+class StopWatch
 {
     /**@var \Statsd\Client */
     protected $client = null;
@@ -11,7 +11,7 @@ class RelativeTimer
     protected $reference = 0;
 
     /**
-     * Timer object to easily send timing stats metrics
+     * StopWatch object to easily send timing stats metrics
      *
      * @param \Statsd\Client $client
      * @param float reference timestamp
@@ -33,7 +33,7 @@ class RelativeTimer
     }
 
     /**
-     * Returns the statsd client used to send metrics for the relative timer
+     * Returns the statsd client used to send metrics
      *
      * @return \Statsd\Client
      */
@@ -47,7 +47,7 @@ class RelativeTimer
      *
      * @param string $metric
      * @param int|float $rate sample rate
-     * @return \Statsd\Client\Timer self reference
+     * @return \Statsd\Client\StopWatch self reference
      */
     public function send($metric, $rate = 1)
     {
