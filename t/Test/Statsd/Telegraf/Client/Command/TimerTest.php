@@ -286,6 +286,76 @@ class TimerTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testTimingSinceWithoutTags()
+    {
+        $start = time();
+        $timer = new Timer();
+        $this->assertRegExp(
+            '/foo.bar:\d{4}\|ms/',
+            $timer->timingSince('foo.bar', time() - 1)
+        );
+    }
+
+    public function testTimingSinceIncludesSampleRateInResult()
+    {
+        $implMock = $this->mockTimer(array('genRand'));
+        $implMock->expects($this->once())
+                ->method('genRand')
+                ->will($this->returnValue(0.45)
+        );
+
+        $this->assertRegExp(
+            '/foo.bar:\d{4}\|ms\|@0\.6/',
+            $implMock->timingSince('foo.bar', time() - 1, 0.6)
+        );
+    }
+
+    public function testTimingSinceReturnsNullWhenSampleIsDiscarded()
+    {
+        $implMock = $this->mockTimer(array('genRand'));
+        $implMock->expects($this->once())
+            ->method('genRand')
+            ->will($this->returnValue(0.85)
+        );
+        $this->assertNull($implMock->timingSince('foo.bar', time() - 100, 0.5));
+    }
+
+    public function testTimingSinceWithTags()
+    {
+        $timer = new Timer();
+        $this->assertRegExp(
+            '/foo.bar,tag1=value1:\d{4}\|ms/',
+            $timer->timingSince(
+                'foo.bar',
+                time() - 1,
+                1,
+                array('tag1' => 'value1')
+            )
+        );
+    }
+
+    public function testTimingSinceWithDefaultTags()
+    {
+        $timer = new Timer();
+        $timer->setDefaultTags(array('tag1' => 'val1', 'tag2' => 'val2'));
+
+        $this->assertRegExp(
+            '/foo.bar,tag1=val1,tag2=val2:\d{4}\|ms/',
+            $timer->timingSince('foo.bar', time() - 1, 1)
+        );
+    }
+
+    public function testTimingSinceWithDefaultTagsAndMetricTags()
+    {
+        $timer = new Timer();
+        $timer->setDefaultTags(array('tag1' => 'val1'));
+
+        $this->assertRegExp(
+            '/foo.bar,tag1=val1,t2=v2:\d{4}\|ms/',
+            $timer->timingSince('foo.bar', time() - 1, 1, array('t2' => 'v2'))
+        );
+    }
+
     private function mockTimer(array $methods=array())
     {
         $implMock = $this->getMock(
