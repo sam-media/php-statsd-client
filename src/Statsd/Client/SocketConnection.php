@@ -3,7 +3,13 @@ namespace Statsd\Client;
 
 class SocketConnection implements ConnectionInterface
 {
-    public function __construct($settings=array())
+    /** @var array */
+    protected $settings = array();
+
+    /** @var resource|null */
+    protected $socket = null;
+
+    public function __construct(array $settings = array())
     {
         $this->settings = array_merge(
             array(

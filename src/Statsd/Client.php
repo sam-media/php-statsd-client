@@ -1,12 +1,14 @@
 <?php
 namespace Statsd;
 
-use \Statsd\Client\CommandInterface;
+use Statsd\Client\CommandInterface;
 use Statsd\Client\StopWatch;
 
 class Client
 {
     protected $commands = array();
+    protected $settings = array();
+    protected $connection = null;
 
     /**
      * Returns associative array of deafult settings.
@@ -61,7 +63,7 @@ class Client
         }
     }
 
-    public function __call($name, $arguments)
+    public function __call($name, array $arguments)
     {
         if (!array_key_exists($name, $this->commands) ) {
             throw new \BadFunctionCallException(
@@ -93,7 +95,7 @@ class Client
         return $this;
     }
 
-    protected function callCommand($name, $arguments)
+    protected function callCommand($name, array $arguments)
     {
         $cmdObj = $this->commands[$name];
         return call_user_func_array(
@@ -123,7 +125,7 @@ class Client
      * since a given time reference (now by default).
      *
      * @param int|null  $reference (default is now)
-     * @return \Statsd\Client\StopWatch
+     * @return \Statsd\AbstractStopWatch
      */
     public function createStopWatch($reference = null)
     {

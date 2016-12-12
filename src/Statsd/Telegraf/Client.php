@@ -56,7 +56,7 @@ class Client extends \Statsd\Client
         }
     }
 
-    public function __call($name, $args)
+    public function __call($name, array $args)
     {
         if (!array_key_exists($name, $this->commands) ) {
             throw new BadMethodCallException(
@@ -75,7 +75,7 @@ class Client extends \Statsd\Client
      * since a given time reference (now by default).
      *
      * @param int|null  $reference (default is now)
-     * @return \Statsd\Telegraf\Client\StopWatch
+     * @return \Statsd\AbstractStopWatch
      */
     public function createStopWatch($reference = null)
     {

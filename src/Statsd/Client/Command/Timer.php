@@ -22,7 +22,7 @@ class Timer extends \Statsd\Client\Command
      * Now an E_USER_DEPRECATED warning is triggered.
      *
      * @param string $stat the metric name
-     * @param int $delta duration in milliseconds
+     * @param int|callable $delta duration in milliseconds
      * @param int $rate sampling rate (default = 1)
      * @return string
      */
