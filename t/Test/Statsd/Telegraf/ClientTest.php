@@ -362,6 +362,23 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\\Statsd\\Telegraf\\Client', $result);
     }
 
+    public function testCreateStopWatchUsesClientToSendMetrics()
+    {
+        $now = microtime(true);
+        $socketMock = $this->mockSocketConnection();
+        $socketMock->expects($this->once())
+            ->method('send')
+            ->with($this->matchesRegularExpression('/^foo.bar:\d+\|ms$/'));
+
+        $statsd = new Client(array('connection' => $socketMock));
+        $stopWatch = $statsd->createStopWatch($now);
+        $this->assertInstanceOf('\\Statsd\\Telegraf\\Client\\StopWatch', $stopWatch);
+        $this->assertEquals($now, $stopWatch->getReferenceTimestamp());
+        $this->assertSame($statsd, $stopWatch->getClient());
+
+        $stopWatch->send('foo.bar');
+    }
+
     private function mockCommand()
     {
         return $this->getMockForAbstractClass(

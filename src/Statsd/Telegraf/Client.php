@@ -6,7 +6,7 @@ use Statsd\Telegraf\Client\Command\Counter;
 use Statsd\Telegraf\Client\Command\Set;
 use Statsd\Telegraf\Client\Command\Timer;
 use Statsd\Telegraf\Client\Command\Gauge;
-
+use Statsd\Telegraf\Client\StopWatch;
 
 class Client extends \Statsd\Client
 {
@@ -56,7 +56,7 @@ class Client extends \Statsd\Client
         }
     }
 
-    public function __call($name, $args)
+    public function __call($name, array $args)
     {
         if (!array_key_exists($name, $this->commands) ) {
             throw new BadMethodCallException(
@@ -68,5 +68,17 @@ class Client extends \Statsd\Client
             );
         }
         return parent::__call($name, $args);
+    }
+
+    /**
+     * Returns a StopWatch that can be used to send timing metrics
+     * since a given time reference (now by default).
+     *
+     * @param int|null  $reference (default is now)
+     * @return \Statsd\AbstractStopWatch
+     */
+    public function createStopWatch($reference = null)
+    {
+        return new StopWatch($this, $reference);
     }
 }

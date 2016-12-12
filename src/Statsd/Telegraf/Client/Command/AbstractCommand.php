@@ -53,7 +53,7 @@ abstract class AbstractCommand implements CommandInterface
 
     /**
      * @param string $stat
-     * @param int    $value
+     * @param string $value
      * @param float  $rate
      * @param array  $tags      associative array of tag name => values
      * @return string|null

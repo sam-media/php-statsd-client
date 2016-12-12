@@ -1,25 +1,29 @@
 <?php
 namespace Test\Statsd;
 
+use Exception;
+use Statsd\Client;
+use Statsd\Client\Command\Counter;
+
 class ClientTest extends \PHPUnit_Framework_TestCase
 {
     public function testClientWithDefaultSettings()
     {
-        $statsd = new \Statsd\Client();
+        $statsd = new Client();
         $this->assertEquals(
             '',
             $statsd->getPrefix()
         );
 
-        $all_settings = $statsd->getSettings();
+        $allSettings = $statsd->getSettings();
         $this->assertFalse(
-            $all_settings['throw_exception']
+            $allSettings['throw_exception']
         );
     }
 
     public function testClientWithOverideSettings()
     {
-        $statsd = new \Statsd\Client(
+        $statsd = new Client(
             array(
                 'prefix' => 'foo.bar',
             )
@@ -31,13 +35,13 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @expectedException BadFunctionCallException
-     * @expectedExceptionMessage Call to undefined method Statsd\Client::fooFunc()
-     */
     public function testClientWithWrongCommand()
     {
-        $statsd = new \Statsd\Client();
+        $statsd = new Client();
+        $this->setExpectedException(
+            '\BadFunctionCallException',
+            'Call to undefined method Statsd\Client::fooFunc()'
+        );
         $statsd->fooFunc("foo", "bar");
     }
 
@@ -64,9 +68,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             ->method('send')
             ->with("foo.bar:1|c");
 
-        $statsd = new \Statsd\Client(array('connection' => $sc));
+        $statsd = new Client(array('connection' => $sc));
         $statsd->addCommand(
-            new \Statsd\Client\Command\Counter()
+            new Counter()
         );
 
         $this->assertInstanceOf(
@@ -82,9 +86,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             ->method('send')
             ->with("top.foo.bar:1|c");
 
-        $statsd = new \Statsd\Client(array('connection' => $sc));
+        $statsd = new Client(array('connection' => $sc));
         $statsd->addCommand(
-            new \Statsd\Client\Command\Counter()
+            new Counter()
         );
         $statsd->setPrefix('top');
 
@@ -94,11 +98,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-
-    /**
-     * @expectedException Exception
-     * @expectedExceptionMessage DUMMY EXCEPTION
-     */
     public function testClientCallCommandWithException()
     {
         $cmd = $this->getMock(
@@ -108,16 +107,18 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $cmd->expects($this->once())
             ->method('incr')
-            ->will($this->throwException(new \Exception("DUMMY EXCEPTION")));
+            ->will($this->throwException(new Exception("DUMMY EXCEPTION")));
 
-        $statsd = new \Statsd\Client(array('throw_exception'=> true));
+        $statsd = new Client(array('throw_exception'=> true));
         $statsd->addCommand($cmd);
+
+        $this->setExpectedException('Exception', 'DUMMY EXCEPTION');
         $statsd->__call('incr', array('foo.bar', 1));
     }
 
     public function testChaingCall()
     {
-        $statsd = new \Statsd\Client();
+        $statsd = new Client();
         $result = $statsd->incr('foo.bar')
             ->decr('foo.bar')
             ->gauge('foo.bar', 10);
@@ -126,5 +127,22 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             '\Statsd\Client',
             $result
         );
+    }
+
+    public function testCreateStopWatchUsesClientToSendMetrics()
+    {
+        $now = microtime(true);
+        $socketMock = $this->getMockUpSocketConnection();
+        $socketMock->expects($this->once())
+            ->method('send')
+            ->with($this->matchesRegularExpression('/^foo.bar:\d+\|ms$/'));
+
+        $statsd = new Client(array('connection' => $socketMock));
+        $stopWatch = $statsd->createStopWatch($now);
+        $this->assertInstanceOf('\Statsd\Client\StopWatch', $stopWatch);
+        $this->assertEquals($now, $stopWatch->getReferenceTimestamp());
+        $this->assertSame($statsd, $stopWatch->getClient());
+
+        $stopWatch->send('foo.bar');
     }
 }
